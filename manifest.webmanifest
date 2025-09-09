@@ -1,0 +1,12 @@
+{
+  "name": "MedQ Trainer",
+  "short_name": "MedQ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f4fb",
+  "theme_color": "#6f3ef4",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose":"any" }
+  ]
+}

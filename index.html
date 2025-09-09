@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MedQ Trainer</title>
+  <meta name="description" content="Mobile friendly medical MCQ practice app." />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+  <meta name="theme-color" content="#f6f4fb" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo"><img src="assets/icon.svg" alt="App icon" /> MedQ Trainer</div>
+    <button id="settingsBtn" class="icon-btn" aria-label="Settings" title="Settings">⚙️</button>
+  </header>
+  <main id="app" class="view-stack">
+    <!-- Start Screen -->
+    <section id="startView" class="view active" aria-labelledby="startHeading">
+      <h1 id="startHeading">Practice</h1>
+      <div class="progress-cards" id="globalProgress"></div>
+      <div class="quick-actions">
+        <button data-size="5" class="primary quick-btn">5 Questions</button>
+        <button data-size="10" class="primary outline quick-btn">10 Questions</button>
+        <button id="customSessionBtn" class="secondary">Custom Session</button>
+      </div>
+      <section class="weak-categories" aria-labelledby="weakHeading">
+        <h2 id="weakHeading">Focus Areas</h2>
+        <div id="weakCategoryList" class="chip-row"></div>
+      </section>
+      <section class="all-categories" aria-labelledby="allCatHeading">
+        <h2 id="allCatHeading">All Categories</h2>
+        <div id="allCategoryList" class="chip-row"></div>
+      </section>
+    </section>
+
+    <!-- Quiz Screen -->
+    <section id="quizView" class="view" aria-labelledby="quizHeading" hidden>
+      <div class="quiz-top-bar">
+        <button id="backToStart" class="icon-btn" aria-label="Back" title="Back">←</button>
+        <div id="sessionMeta" class="session-meta"></div>
+        <div id="questionProgress" class="question-progress"></div>
+      </div>
+      <h2 id="quizHeading" class="question-text"></h2>
+      <ol id="optionsList" class="options" role="list"></ol>
+      <div id="answerFeedback" class="answer-feedback" hidden></div>
+      <div class="quiz-actions">
+        <button id="nextQuestionBtn" class="primary" disabled>Next</button>
+        <button id="endSessionBtn" class="secondary">End</button>
+      </div>
+    </section>
+
+    <!-- Summary Screen -->
+    <section id="summaryView" class="view" aria-labelledby="summaryHeading" hidden>
+      <h2 id="summaryHeading">Session Summary</h2>
+      <div id="summaryStats" class="summary-stats"></div>
+      <div id="reviewList" class="review-list"></div>
+      <div class="summary-actions">
+        <button id="restartWeakBtn" class="primary">Practice Weak Again</button>
+        <button id="returnHomeBtn" class="secondary">Home</button>
+      </div>
+    </section>
+
+    <!-- Modal for custom session -->
+    <dialog id="customDialog">
+      <form method="dialog" id="customForm" class="custom-form">
+        <h2>Create Custom Session</h2>
+        <label>Number of Questions
+          <input type="number" id="customCount" min="1" max="50" value="15" />
+        </label>
+        <fieldset>
+          <legend>Categories</legend>
+          <div id="customCategoryChecklist" class="checklist"></div>
+        </fieldset>
+        <menu class="dialog-actions">
+          <button value="cancel" class="secondary">Cancel</button>
+          <button id="startCustomBtn" value="default" class="primary">Start</button>
+        </menu>
+      </form>
+    </dialog>
+  </main>
+  <template id="optionTemplate">
+    <li class="option-item"><button type="button" class="option-btn"></button></li>
+  </template>
+  <template id="reviewTemplate">
+    <details class="review-item">
+      <summary class="review-q"></summary>
+      <div class="review-meta"></div>
+      <ol class="review-options"></ol>
+      <div class="review-info"></div>
+    </details>
+  </template>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" integrity="sha384-0d37j6P9sHNm83PoVdPn3/DfiwNhi4sNUnkKL9MkpQ2Vic6a2z6e9I8A6Z9YgH0Y" crossorigin="anonymous"></script>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
