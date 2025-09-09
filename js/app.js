@@ -5,6 +5,7 @@ let filteredQuestions = [];
 let currentSession = null; // { questions:[], index, answers:[], startTime }
 const STORAGE_KEY = 'medq_trainer_v1';
 let store = loadStore();
+let questionsLoaded = false;
 
 function loadStore(){
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { stats:{ perCategory:{}, daily:{}, totalAnswered:0, totalCorrect:0 }, lastSession:null }; } catch(e){ return { stats:{ perCategory:{}, daily:{}, totalAnswered:0, totalCorrect:0 }, lastSession:null }; }
@@ -14,15 +15,27 @@ function todayKey(){ return new Date().toISOString().slice(0,10); }
 
 // Fetch + parse YAML
 async function loadQuestions(){
-  const res = await fetch('data/questions.yaml');
-  const text = await res.text();
-  const data = jsyaml.load(text); // array
-  ALL_QUESTIONS = data.filter(q=>q.uses_image === false);
-  buildCategoryCaches();
-  renderCategoryChips();
-  refreshDashboard();
-  hydrateCustomDialog();
-  maybeResume();
+  const loadingEl = document.getElementById('loadingStatus');
+  try {
+    const res = await fetch('data/questions.yaml');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    const data = jsyaml.load(text); // array
+    ALL_QUESTIONS = Array.isArray(data) ? data.filter(q=>q.uses_image === false) : [];
+    questionsLoaded = true;
+    loadingEl && (loadingEl.textContent = 'Loaded '+ALL_QUESTIONS.length+' questions');
+    buildCategoryCaches();
+    renderCategoryChips();
+    refreshDashboard();
+    hydrateCustomDialog();
+    maybeResume();
+    setTimeout(()=> loadingEl && loadingEl.remove(), 1200);
+  } catch(err){
+    console.error('Failed to load questions', err);
+    if(loadingEl){
+      loadingEl.outerHTML = '<div class="error-banner">Failed to load questions. If you opened the file directly, run a local server so fetch works.</div>';
+    }
+  }
 }
 
 function buildCategoryCaches(){
@@ -80,7 +93,14 @@ returnHomeBtn.addEventListener('click', ()=>{ showView(startView); refreshDashbo
 function showView(v){ [startView, quizView, summaryView].forEach(sec=>{ if(sec===v){ sec.hidden=false; sec.classList.add('active'); } else { sec.hidden=true; sec.classList.remove('active'); } }); window.scrollTo({top:0, behavior:'instant'}); }
 
 function startNewSession({ count, categories }){
-  if(!ALL_QUESTIONS.length) return;
+  if(!questionsLoaded){
+    alert('Questions are still loading. Please wait.');
+    return;
+  }
+  if(!ALL_QUESTIONS.length){
+    alert('No questions available.');
+    return;
+  }
   const pool = categories && categories.length ? ALL_QUESTIONS.filter(q=> categories.includes(q.category)) : [...ALL_QUESTIONS];
   shuffle(pool);
   const picked = pool.slice(0, Math.min(count, pool.length)).map(q=>({ ...q }));
@@ -155,25 +175,11 @@ function recordStats(q){
   saveStore();
 }
 
-function finalizeSession(){
-  if(!currentSession) return;
-  // clear lastSession
-  store.lastSession = null; saveStore();
-  buildSummary();
-  currentSession = null;
-  showView(summaryView);
-}
+// (Removed earlier duplicate finalizeSession – consolidated below)
 
 function endSession(){ currentSession = null; store.lastSession = null; saveStore(); }
 
-function buildSummary(){
-  const answers = store.stats; // for overall
-  const s = summaryStats; s.innerHTML='';
-  const lastSessionAnswers = (store.lastSession? store.lastSession.answers:[]); // not used after finalize
-  const sessionData = lastSessionAnswers; // placeholder
-  const session = store.lastSession; // will be null now; we reconstruct from a temp? Instead keep a copy before clearing
-  // We'll reconstruct from a backup copy captured earlier.
-}
+function buildSummary() { /* legacy no-op retained for backward compatibility */ }
 
 // We'll store previous session answers before clearing
 let lastFinishedSession = null;
